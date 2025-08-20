@@ -1,21 +1,4 @@
-# Suji Landing — Components Edition
+<img width="1879" height="996" alt="image" src="https://github.com/user-attachments/assets/44006909-c250-4be5-badf-ccacffd354af" />
+my own website for my music alias
 
-Clean Japanese-minimal landing page using **React + Vite + Tailwind + Motion**, split into components for scalability.
-
-## Run
-
-```bash
-npm install
-npm run dev
-```
-
-## Components
-
-- `components/NavBar.jsx` — header with **link** button and **dark/light** toggle
-- `components/linkPalette.jsx` — small command-palette dialog listing official links
-- `App.jsx` — hero + footer + palette wiring
-
-### Shortcuts
-
-- **Cmd/Ctrl + K** — open the link palette
-- **Esc** — close palette
+link:https://sujilament.netlify.app
