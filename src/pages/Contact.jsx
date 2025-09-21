@@ -10,7 +10,7 @@ export default function Contact() {
           <br />
           or email:{" "}
           <a
-            href="mailto:vichet.sopheaktra.work@gmail.com"
+            href="mailto:sujilament@gmail.com"
             className="underline hover:text-neutral-900 dark:hover:text-white"
           >
             sujilament@gmail.com
