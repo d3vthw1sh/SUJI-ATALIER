@@ -13,7 +13,7 @@ export default function Contact() {
             href="mailto:vichet.sopheaktra.work@gmail.com"
             className="underline hover:text-neutral-900 dark:hover:text-white"
           >
-            vichet.sopheaktra.work@gmail.com
+            sujilament@gmail.com
           </a>
         </p>
       </section>
