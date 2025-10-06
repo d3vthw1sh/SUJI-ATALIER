@@ -42,8 +42,7 @@ export default function Home() {
             custom={1}
             className="mt-3 text-base md:text-lg text-white/90 drop-shadow"
           >
-            Music artist blending orchestral, fantasy, and electronic elements —
-            minimal &amp; cinematic.
+            Music artist blending orchestral, fantasy, and electronic elements.
           </motion.p>
 
           <motion.div
