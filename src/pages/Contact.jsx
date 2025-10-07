@@ -9,9 +9,7 @@ export default function Contact() {
   useEffect(() => {
     const io = new IntersectionObserver(
       ([e]) => e.isIntersecting && setShow(true),
-      {
-        threshold: 0.2,
-      }
+      { threshold: 0.2 }
     );
     if (sectionRef.current) io.observe(sectionRef.current);
     return () => io.disconnect();
@@ -33,14 +31,12 @@ export default function Contact() {
           <img
             src="/contactpage/image_sketch2_by_lunaminiss.png"
             alt="Contact artwork"
-            className="w-full max-h-[70vh] object-contain dark:invert rounded-lg translate-x-6 sm:translate-x-12 md:translate-x-16 transition-transform duration-700"
+            className="w-full max-h-[70vh] object-contain dark:invert rounded-lg md:translate-x-16 transition-transform duration-700"
           />
 
-          {/* Text overlay (middle-left) */}
-          <div className="absolute left-10 sm:left-16 md:left-20 top-1/2 -translate-y-1/2 text-left max-w-sm">
-            <h2 className="mb-3 text-3xl sm:text-4xl font-normal tracking-wide">
-              Contact
-            </h2>
+          {/* Text overlay — desktop only (unchanged layout) */}
+          <div className="hidden md:block absolute left-20 top-1/2 -translate-y-1/2 text-left max-w-sm">
+            <h2 className="mb-3 text-4xl font-normal tracking-wide">Contact</h2>
             <p className="text-[15.5px] leading-relaxed text-neutral-700 dark:text-neutral-200">
               You can reach me through Discord:{" "}
               <span className="font-medium">@suji_lament</span>
@@ -57,6 +53,26 @@ export default function Contact() {
               “Leave a message.”
             </p>
           </div>
+        </div>
+
+        {/* Mobile stack — only shows on small screens */}
+        <div className="md:hidden mt-4 text-left">
+          <h2 className="mb-2 text-3xl font-normal tracking-wide">Contact</h2>
+          <p className="text-[15.5px] leading-relaxed text-neutral-700 dark:text-neutral-200">
+            You can reach me through Discord:{" "}
+            <span className="font-medium">@suji_lament</span>
+            <br />
+            or email:{" "}
+            <a
+              href="mailto:sujilament@gmail.com"
+              className="underline decoration-[var(--accent)] underline-offset-4 hover:text-neutral-900 dark:hover:text-white break-all"
+            >
+              sujilament@gmail.com
+            </a>
+          </p>
+          <p className="mt-4 text-sm italic text-neutral-500 dark:text-neutral-400">
+            “Leave a message.”
+          </p>
         </div>
       </section>
     </main>
