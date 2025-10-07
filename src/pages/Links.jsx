@@ -1,9 +1,5 @@
 // src/pages/Links.jsx
-<<<<<<< HEAD
 import { useEffect, useRef, useState } from "react";
-=======
-import { useState } from "react";
->>>>>>> b8b4532d784b68e9a154ad2c0e0e3a15288e5b87
 import { motion } from "framer-motion";
 import {
   FaSpotify,
@@ -14,12 +10,9 @@ import {
   FaDiscord,
 } from "react-icons/fa";
 
-<<<<<<< HEAD
 /** ====== CONFIG ====== **/
 const ACCENT = "#6C7AA8"; // match About/Contact/Works
 
-=======
->>>>>>> b8b4532d784b68e9a154ad2c0e0e3a15288e5b87
 const LINKS = [
   {
     label: "Spotify",
@@ -45,10 +38,7 @@ const LINKS = [
   { label: "Discord", href: "https://discord.gg/s9wF3YkwBW", Icon: FaDiscord },
 ];
 
-<<<<<<< HEAD
 /** ====== MOTION VARIANTS ====== **/
-=======
->>>>>>> b8b4532d784b68e9a154ad2c0e0e3a15288e5b87
 const container = {
   hidden: { opacity: 0 },
   show: {
@@ -61,17 +51,12 @@ const item = {
   show: {
     opacity: 1,
     y: 0,
-<<<<<<< HEAD
     transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] },
-=======
-    transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] },
->>>>>>> b8b4532d784b68e9a154ad2c0e0e3a15288e5b87
   },
 };
 
 export default function Links() {
   const [copied, setCopied] = useState(false);
-<<<<<<< HEAD
   const sectionRef = useRef(null);
   const [reveal, setReveal] = useState(false);
 
@@ -85,8 +70,6 @@ export default function Links() {
     if (sectionRef.current) io.observe(sectionRef.current);
     return () => io.disconnect();
   }, []);
-=======
->>>>>>> b8b4532d784b68e9a154ad2c0e0e3a15288e5b87
 
   const copyDiscord = async () => {
     try {
@@ -99,7 +82,6 @@ export default function Links() {
   };
 
   return (
-<<<<<<< HEAD
     <main
       className="relative px-4 pt-20 pb-24 sm:px-6 font-libre text-neutral-800 dark:text-neutral-200"
       style={{ ["--accent"]: ACCENT }}
@@ -148,37 +130,6 @@ export default function Links() {
           initial="hidden"
           animate={reveal ? "show" : "hidden"}
           className="mt-8 space-y-3 text-left"
-=======
-    <main className="pt-14 min-h-[calc(100dvh-56px)] px-4 sm:px-6">
-      <section className="mx-auto w-full max-w-xl">
-        <div className="text-center">
-          <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight">
-            suji °
-          </h1>
-          <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300">
-            official links · minimal &amp; clean
-          </p>
-
-          <div className="mt-5 flex justify-center">
-            <button
-              onClick={copyDiscord}
-              className="inline-flex items-center gap-2 rounded-full border border-black/10 dark:border-white/15 
-                         px-3 py-1.5 text-xs hover:bg-black hover:text-white
-                         dark:hover:bg-white dark:hover:text-neutral-900 transition-colors"
-              aria-label="Copy Discord handle"
-            >
-              <FaDiscord className="text-[12px]" aria-hidden />
-              {copied ? "copied ✓" : "discord: @suji_lament"}
-            </button>
-          </div>
-        </div>
-
-        <motion.nav
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="mt-8 space-y-3"
->>>>>>> b8b4532d784b68e9a154ad2c0e0e3a15288e5b87
         >
           {LINKS.map(({ href, label, Icon }) => (
             <motion.a
@@ -188,27 +139,16 @@ export default function Links() {
               rel="noreferrer noopener"
               variants={item}
               className="group flex items-center justify-between gap-3 rounded-xl
-<<<<<<< HEAD
                          border border-neutral-200 dark:border-neutral-800
                          bg-white/60 dark:bg-neutral-900/40 backdrop-blur
                          px-4 sm:px-5 py-4 transition-colors
                          hover:bg-white dark:hover:bg-neutral-800"
-=======
-                         border border-black/10 dark:border-white/10
-                         bg-white/70 dark:bg-neutral-900/60
-                         px-4 sm:px-5 py-4 transition-colors
-                         hover:bg-white dark:hover:bg-neutral-800/70"
->>>>>>> b8b4532d784b68e9a154ad2c0e0e3a15288e5b87
               aria-label={`${label} (opens in new tab)`}
             >
               <span className="flex items-center gap-3">
                 <span
                   aria-hidden
-<<<<<<< HEAD
                   className="grid place-items-center size-8 rounded-full border border-neutral-200 dark:border-neutral-800"
-=======
-                  className="grid place-items-center size-8 rounded-full border border-black/10 dark:border-white/15"
->>>>>>> b8b4532d784b68e9a154ad2c0e0e3a15288e5b87
                 >
                   <Icon className="text-[14px]" />
                 </span>
@@ -226,14 +166,10 @@ export default function Links() {
           ))}
         </motion.nav>
 
-<<<<<<< HEAD
         {/* Tiny outro (optional, matches tone) */}
         <p className="mt-10 text-sm italic text-neutral-500 dark:text-neutral-400">
           “Find me where the echoes live.”
         </p>
-=======
-        <div className="h-12" />
->>>>>>> b8b4532d784b68e9a154ad2c0e0e3a15288e5b87
       </section>
     </main>
   );
