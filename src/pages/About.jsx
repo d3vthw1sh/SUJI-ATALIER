@@ -106,7 +106,7 @@ export default function About() {
 
       <section className="relative mx-auto max-w-3xl">
         <h2 className="mb-2 text-center text-3xl sm:text-4xl font-normal tracking-wide">
-          About Suji
+          About
         </h2>
         <div
           className="mx-auto mb-8 h-px w-24"
