@@ -41,19 +41,22 @@ export default function ParallaxHero({
   const [ready, setReady] = useState(false);
   useEffect(() => {
     let alive = true;
-    // Safety timeout: force reveal after 600ms even if slow
-    const timer = setTimeout(() => {
-      if (alive) setReady(true);
-    }, 600);
-
-    // Priority load: Background (Layer 1)
+    
+    // 1. Background Priority with Decode
     const imgBg = new Image();
-    imgBg.onload = () => {
-      if (alive) setReady(true);
-    };
     imgBg.src = layers[0].src;
+    
+    // Force decode off-main-thread
+    imgBg.decode()
+      .then(() => {
+        if (alive) setReady(true);
+      })
+      .catch((e) => {
+        console.warn("Decode failed, falling back", e);
+        if (alive) setReady(true);
+      });
 
-    // Silent preload for others
+    // 2. Preload others silently
     layers.slice(1).forEach(({ src }) => {
       const img = new Image();
       img.src = src;
@@ -61,7 +64,6 @@ export default function ParallaxHero({
 
     return () => {
       alive = false;
-      clearTimeout(timer);
     };
   }, [layers]);
 
@@ -139,14 +141,13 @@ export default function ParallaxHero({
                   rotateY: rY,
                   zIndex: layer.z,
                 }}
-                initial={{ opacity: 0, scale: baseScale * 1.1 }}
+                initial={{ opacity: 0, scale: baseScale }}
                 animate={{ 
                   opacity: ready ? 1 : 0,
-                  scale: ready ? baseScale : baseScale * 1.1
+                  scale: baseScale
                 }}
                 transition={{ 
                   opacity: { duration: 0.8, delay: layer.depthNorm * 0.1 },
-                  scale: { duration: 2.5, ease: "easeOut" }
                 }}
               />
             );
