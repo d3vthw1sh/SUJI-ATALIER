@@ -8,6 +8,7 @@ import {
   FaTwitter,
   FaPatreon,
   FaDiscord,
+  FaPaintBrush,
 } from "react-icons/fa";
 
 /** ====== CONFIG ====== **/
@@ -34,6 +35,11 @@ const LINKS = [
     label: "Patreon",
     href: "https://www.patreon.com/c/suji_lament",
     Icon: FaPatreon,
+  },
+  {
+    label: "VGen",
+    href: "https://vgen.co/SUJI_LAMENT",
+    Icon: FaPaintBrush,
   },
   { label: "Discord", href: "https://discord.gg/s9wF3YkwBW", Icon: FaDiscord },
 ];
