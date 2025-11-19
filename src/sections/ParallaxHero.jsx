@@ -6,40 +6,38 @@ import {
   useReducedMotion,
 } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
+import FloatingParticles from "../components/FloatingParticles";
 
 /**
- * ParallaxHero v3 (public/art/1.png..5.png)
- * - 1.png (bottom) = completely static
- * - Higher layers move/tilt more, max at the top layer
- * - Mouse-only parallax with spring smoothing + rAF throttling
+ * ParallaxHero v4 (Restored)
+ * - Cinematic entrance (zoom out)
+ * - Floating particles (Subtle)
+ * - Mouse parallax
  */
 export default function ParallaxHero({
   children,
   height = "h-[calc(100vh-var(--header-h,64px))]",
-  forceMotion = true, // set false to respect OS "Reduce Motion"
-  baseScale = 1.075, // small safety scale to hide edges while moving
-  tiltMax = { x: 6, y: 10 }, // degrees (x = pitch, y = yaw)
-  depthPx = { min: 24, max: 90 }, // translate range from far→near (px)
+  forceMotion = true,
+  baseScale = 1.15, // slightly larger for zoom effect
+  tiltMax = { x: 5, y: 8 },
+  depthPx = { min: 20, max: 80 },
 }) {
-  // your files live in /public/art/, served at /art/
   const BASE = "/art/";
-  const COUNT = 5; // you currently have 1..5.png
+  const COUNT = 5;
 
   const prefersReduced = useReducedMotion();
   const DISABLE_MOTION = !forceMotion && prefersReduced;
 
-  // layer order: 1 bottom (static) → COUNT top (max)
   const layers = useMemo(
     () =>
       Array.from({ length: COUNT }, (_, i) => {
         const index = i + 1;
-        const depthNorm = COUNT > 1 ? (index - 1) / (COUNT - 1) : 0; // 0..1
-        return { src: `${BASE}${index}.png`, z: index, depthNorm, index };
+        const depthNorm = COUNT > 1 ? (index - 1) / (COUNT - 1) : 0;
+        return { src: `${BASE}${index}.png`, z: index, depthNorm };
       }),
     []
   );
 
-  // preloader for a clean fade-in
   const [ready, setReady] = useState(false);
   useEffect(() => {
     let alive = true,
@@ -57,37 +55,24 @@ export default function ParallaxHero({
     };
   }, [layers]);
 
-  // pointer tracking (rAF-throttled) → spring MV (-0.5..0.5)
+  // Mouse Parallax Logic
   const wrapRef = useRef(null);
   const rawX = useMotionValue(0);
   const rawY = useMotionValue(0);
-  const x = useSpring(rawX, { stiffness: 180, damping: 18, mass: 0.25 });
-  const y = useSpring(rawY, { stiffness: 180, damping: 18, mass: 0.25 });
+  const x = useSpring(rawX, { stiffness: 120, damping: 20 });
+  const y = useSpring(rawY, { stiffness: 120, damping: 20 });
 
   useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
-    let af = 0;
-    let pending = null;
-
-    const handle = (clientX, clientY) => {
-      const r = el.getBoundingClientRect();
-      const nx = (clientX - (r.left + r.width / 2)) / r.width; // -0.5..0.5
-      const ny = (clientY - (r.top + r.height / 2)) / r.height; // -0.5..0.5
-      rawX.set(nx);
-      rawY.set(ny);
-    };
-
+    
     const onMove = (e) => {
       if (DISABLE_MOTION) return;
-      pending = { x: e.clientX, y: e.clientY };
-      if (!af) {
-        af = requestAnimationFrame(() => {
-          if (pending) handle(pending.x, pending.y);
-          af = 0;
-          pending = null;
-        });
-      }
+      const r = el.getBoundingClientRect();
+      const nx = (e.clientX - (r.left + r.width / 2)) / r.width;
+      const ny = (e.clientY - (r.top + r.height / 2)) / r.height;
+      rawX.set(nx);
+      rawY.set(ny);
     };
 
     const onLeave = () => {
@@ -100,27 +85,25 @@ export default function ParallaxHero({
     return () => {
       el.removeEventListener("mousemove", onMove);
       el.removeEventListener("mouseleave", onLeave);
-      if (af) cancelAnimationFrame(af);
     };
   }, [DISABLE_MOTION, rawX, rawY]);
 
-  // per-layer movement strength (px)
   const strengthFor = (depthNorm) => {
-    if (depthNorm === 0) return 0; // absolutely static bottom layer
+    if (depthNorm === 0) return 0;
     const { min, max } = depthPx;
-    return min + Math.pow(depthNorm, 1.15) * (max - min);
+    return min + Math.pow(depthNorm, 1.2) * (max - min);
   };
 
   return (
     <section
-      className={`relative w-screen left-1/2 -translate-x-1/2 ${height}`}
+      className={`parallax-hero relative w-screen left-1/2 -translate-x-1/2 ${height} overflow-hidden bg-[#0B0B0C]`}
     >
       <div
         ref={wrapRef}
-        className="relative w-full h-full overflow-hidden bg-neutral-100 dark:bg-[#0B0B0C]"
-        style={{ perspective: "1000px", transformStyle: "preserve-3d" }}
+        className="relative w-full h-full"
+        style={{ perspective: "1200px", transformStyle: "preserve-3d" }}
       >
-        {/* Each layer has its own parallax + tilt */}
+        {/* Layers */}
         <div className="absolute inset-0">
           {layers.map((layer) => {
             const s = strengthFor(layer.depthNorm);
@@ -131,9 +114,6 @@ export default function ParallaxHero({
             );
             const rY = useTransform(x, (v) =>
               DISABLE_MOTION ? 0 : v * (tiltMax.y * layer.depthNorm)
-            );
-            const rZ = useTransform(x, (v) =>
-              DISABLE_MOTION ? 0 : v * (0.5 + layer.depthNorm * 1.25)
             );
 
             return (
@@ -147,43 +127,50 @@ export default function ParallaxHero({
                   translateY: ty,
                   rotateX: rX,
                   rotateY: rY,
-                  rotateZ: rZ,
-                  zIndex: layer.z, // 1..COUNT
-                  scale: baseScale,
+                  zIndex: layer.z,
                 }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: ready ? 1 : 0 }}
-                transition={{ duration: 0.4, delay: layer.depthNorm * 0.045 }}
-                aria-hidden="true"
+                initial={{ opacity: 0, scale: baseScale * 1.1 }}
+                animate={{ 
+                  opacity: ready ? 1 : 0,
+                  scale: ready ? baseScale : baseScale * 1.1
+                }}
+                transition={{ 
+                  opacity: { duration: 0.8, delay: layer.depthNorm * 0.1 },
+                  scale: { duration: 2.5, ease: "easeOut" }
+                }}
               />
             );
           })}
         </div>
 
-        {/* Vignette + soft grain */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/30" />
+        {/* Atmosphere */}
+        <FloatingParticles count={25} className="bg-white/60" />
+        
+        {/* Vignette & Grain */}
+        <div className="absolute inset-0 pointer-events-none z-30">
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]" />
           <div
-            className="absolute inset-0 opacity-[0.07] mix-blend-overlay"
+            className="absolute inset-0 opacity-[0.04] mix-blend-overlay"
             style={{
-              backgroundImage:
-                "radial-gradient(circle at 1px 1px, rgba(255,255,255,.7) 1px, transparent 0)",
-              backgroundSize: "3px 3px",
+              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
             }}
           />
         </div>
 
-        {/* Overlay slot */}
-        <div className="absolute inset-0 z-30 grid place-items-center px-6">
-          <div className="text-center pointer-events-auto">{children}</div>
+        {/* Content Overlay */}
+        <div className="absolute inset-0 z-40 flex items-center justify-center px-6">
+          <div className="relative text-center pointer-events-auto">
+            {children}
+          </div>
         </div>
 
-        {/* Loading veil */}
+        {/* Loading Veil */}
         <motion.div
           initial={{ opacity: 1 }}
           animate={{ opacity: ready ? 0 : 1 }}
-          transition={{ duration: 0.25 }}
-          className="absolute inset-0 bg-neutral-200/40 dark:bg-black/30 pointer-events-none"
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="absolute inset-0 bg-black z-50 pointer-events-none"
         />
       </div>
     </section>

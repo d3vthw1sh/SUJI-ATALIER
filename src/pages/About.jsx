@@ -1,16 +1,17 @@
 // src/pages/About.jsx
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 /** ====== CONFIG ====== **/
-const ACCENT = "#6C7AA8"; // change to your OC/brand color
+const ACCENT = "#6C7AA8"; // brand color
 
-// Featured image (NOT in gallery). Inverts on dark mode.
+// Featured image
 const FEATURED = {
   src: "/aboutpage/image_sketch_by_lunaminiss.png",
   cap: "OC sketch: stray lines, wind in the hair, and a half-smile that knows.",
 };
 
-// Gallery (image_sketch2 removed)
+// Gallery
 const GALLERY = [
   { src: "/aboutpage/OC_by_Jtlr4hj_.jpg", cap: "OC illustration by Jtlr4hj" },
   {
@@ -27,50 +28,80 @@ const GALLERY = [
   },
 ];
 
-/** ====== BLUR-IMAGE HELPER ====== **/
+/** ====== COMPONENTS ====== **/
+
 function BlurImage({ src, alt, className = "" }) {
   const [loaded, setLoaded] = useState(false);
   return (
-    <img
-      src={src}
-      alt={alt}
-      loading="lazy"
-      onLoad={() => setLoaded(true)}
-      className={`${className} transition-[filter,opacity,transform] duration-700
-        ${
-          loaded
-            ? "opacity-100 blur-0 translate-y-0"
-            : "opacity-80 blur-[2px] translate-y-[2px]"
-        }`}
-    />
+    <div className={`relative overflow-hidden ${className}`}>
+      <motion.img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
+        initial={{ opacity: 0, filter: "blur(10px)" }}
+        animate={{ 
+          opacity: loaded ? 1 : 0, 
+          filter: loaded ? "blur(0px)" : "blur(10px)" 
+        }}
+        transition={{ duration: 0.7 }}
+        className="w-full h-full object-cover"
+      />
+    </div>
   );
 }
 
+function FogBackground() {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none select-none z-0">
+      <motion.div
+        initial={{ x: "-10%" }}
+        animate={{ x: "10%" }}
+        transition={{
+          repeat: Infinity,
+          repeatType: "mirror",
+          duration: 20,
+          ease: "easeInOut",
+        }}
+        className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] opacity-30 dark:opacity-10"
+        style={{
+          background: `radial-gradient(circle at 50% 50%, rgba(255,255,255,0), rgba(108, 122, 168, 0.1) 40%, transparent 70%)`,
+          filter: "blur(60px)",
+        }}
+      />
+      <motion.div
+        initial={{ opacity: 0.3 }}
+        animate={{ opacity: 0.6 }}
+        transition={{
+          repeat: Infinity,
+          repeatType: "mirror",
+          duration: 5,
+          ease: "easeInOut",
+        }}
+        className="absolute inset-0 bg-gradient-to-b from-transparent via-neutral-100/20 to-neutral-100/80 dark:via-neutral-900/20 dark:to-neutral-900/80"
+      />
+    </div>
+  );
+}
+
+const containerVar = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const itemVar = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+};
+
 export default function About() {
-  /** reveal animations **/
-  const introRef = useRef(null);
-  const quoteRef = useRef(null);
-  const [showIntro, setShowIntro] = useState(false);
-  const [showQuote, setShowQuote] = useState(false);
-
-  useEffect(() => {
-    const io1 = new IntersectionObserver(
-      ([e]) => e.isIntersecting && setShowIntro(true),
-      { threshold: 0.15 }
-    );
-    const io2 = new IntersectionObserver(
-      ([e]) => e.isIntersecting && setShowQuote(true),
-      { threshold: 0.2 }
-    );
-    if (introRef.current) io1.observe(introRef.current);
-    if (quoteRef.current) io2.observe(quoteRef.current);
-    return () => {
-      io1.disconnect();
-      io2.disconnect();
-    };
-  }, []);
-
-  /** Lightbox **/
+  /** Lightbox Logic **/
   const ALL_IMAGES = useMemo(
     () => [FEATURED.src, ...GALLERY.map((g) => g.src)],
     []
@@ -95,247 +126,246 @@ export default function About() {
 
   return (
     <main
-      className="relative px-4 pt-20 pb-24 sm:px-6 font-libre text-neutral-800 dark:text-neutral-200"
-      style={{ ["--accent"]: ACCENT }}
+      className="relative min-h-screen px-4 pt-24 pb-32 sm:px-6 font-libre text-neutral-800 dark:text-neutral-200 overflow-hidden"
+      style={{ "--accent": ACCENT }}
     >
-      {/* subtle fog */}
-      <div
-        className="pointer-events-none absolute inset-0 top-0 h-[40vh] bg-gradient-to-b from-neutral-100/70 to-transparent dark:from-neutral-900/70"
-        aria-hidden="true"
-      />
+      <FogBackground />
 
-      <section className="relative mx-auto max-w-3xl">
-        <h2 className="mb-2 text-center text-3xl sm:text-4xl font-normal tracking-wide">
-          About
-        </h2>
-        <div
-          className="mx-auto mb-8 h-px w-24"
-          style={{ backgroundColor: "var(--accent)", opacity: 0.65 }}
-        />
-
-        {/* Intro */}
-        <p
-          ref={introRef}
-          className={`text-[17px] leading-relaxed text-justify transition-all duration-1000
-            ${
-              showIntro
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-4"
-            }
-            first-letter:float-left first-letter:mr-2 first-letter:text-5xl first-letter:font-normal first-letter:leading-none first-letter:pt-1`}
+      <div className="relative z-10 mx-auto max-w-4xl">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+          className="text-center mb-16"
         >
-          I’m <strong>Suji</strong>, a producer who builds quiet worlds out of
-          sound. Every track begins in stillness and grows from a feeling of
-          distance, like light reflecting on water. I like slow textures, fading
-          chords, and melodies that almost disappear. It’s music for moments
-          that don’t need to be loud.
-        </p>
+          <h2 className="text-4xl sm:text-6xl font-thin tracking-[0.2em] uppercase text-neutral-900 dark:text-white drop-shadow-sm">
+            About
+          </h2>
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: 100 }}
+            transition={{ delay: 0.5, duration: 0.8 }}
+            className="h-[1px] bg-current mx-auto mt-4 opacity-50"
+          />
+        </motion.div>
 
-        {/* Quote */}
-        <blockquote
-          ref={quoteRef}
-          className={`mt-6 border-l pl-4 italic text-[17px] text-neutral-600 dark:text-neutral-400 transition-all duration-700 ${
-            showQuote ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-          }`}
-          style={{ borderColor: "var(--accent)" }}
+        {/* Intro Section */}
+        <motion.section
+          variants={containerVar}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-100px" }}
+          className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-24"
         >
-          “Somewhere between the real and the imagined — that’s where my sound
-          lives.”
-        </blockquote>
-
-        {/* Small scroll cue */}
-        <div className="mt-10 flex justify-center">
-          <div className="flex flex-col items-center text-neutral-400 text-xs select-none">
-            <span className="tracking-wide">scroll</span>
-            <span className="mt-1 inline-block animate-bounce">▾</span>
-          </div>
-        </div>
-
-        {/* Featured Sketch (inverts in dark mode) */}
-        <div className="mt-12">
-          <figure className="relative group mb-2 flex flex-col items-center">
-            <button
-              onClick={() => openLightbox(FEATURED.src)}
-              className="group w-full max-w-2xl focus:outline-none"
-              aria-label="Open artwork"
+          <motion.div variants={itemVar} className="order-2 md:order-1">
+             <p className="text-lg leading-loose text-justify font-light">
+              <span className="text-4xl float-left mr-2 mt-[-6px] font-serif text-[var(--accent)]">I</span>
+              ’m <strong>Suji</strong>, a producer who builds quiet worlds out of
+              sound. Every track begins in stillness and grows from a feeling of
+              distance, like light reflecting on water. I like slow textures, fading
+              chords, and melodies that almost disappear. It’s music for moments
+              that don’t need to be loud.
+            </p>
+            <motion.blockquote
+              variants={itemVar}
+              className="mt-8 pl-6 border-l-2 border-[var(--accent)] italic text-neutral-500 dark:text-neutral-400"
             >
-              <BlurImage
-                src={FEATURED.src}
-                alt="OC sketch"
-                className="w-full object-contain invert-0 dark:invert"
-              />
-              <span
-                className="absolute inset-x-0 bottom-0 translate-y-2 opacity-0 group-hover:opacity-100 group-hover:translate-y-0
-                  transition-all duration-300 text-center text-xs bg-black/40 backdrop-blur-sm text-white py-1"
-              >
-                {FEATURED.cap}
-              </span>
-            </button>
-          </figure>
-          <figcaption className="mt-3 text-sm text-neutral-500 dark:text-neutral-400 text-center">
-            Visual art by <span className="font-medium">lunaminiss</span>
-          </figcaption>
-        </div>
+              “Somewhere between the real and the imagined — that’s where my sound lives.”
+            </motion.blockquote>
+          </motion.div>
 
-        {/* Character Lore (Lyune) */}
-        <div className="mt-12 grid gap-3">
-          <h3 className="text-center text-xl font-normal">Character Lore</h3>
+          <motion.div variants={itemVar} className="order-1 md:order-2 flex justify-center">
+             <div 
+                className="relative group cursor-pointer"
+                onClick={() => openLightbox(FEATURED.src)}
+             >
+                <div className="absolute -inset-2 bg-[var(--accent)]/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                <BlurImage
+                  src={FEATURED.src}
+                  alt="OC Sketch"
+                  className="w-64 h-64 sm:w-80 sm:h-80 object-contain invert-0 dark:invert drop-shadow-2xl transition-transform duration-500 group-hover:scale-105"
+                />
+             </div>
+          </motion.div>
+        </motion.section>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[15px]">
-            <div className="p-3 border-t border-neutral-200 dark:border-neutral-800">
-              <div className="text-xs uppercase tracking-wide text-neutral-500">
-                Name
-              </div>
-              <div className="mt-1">
-                <strong>Lyune</strong>{" "}
-                <span className="text-neutral-500 text-sm">
-                  (pronounced Ly-yu-ne)
-                </span>
-                <br />— “lyric + lune,” a quiet song beneath a dying sky
-              </div>
-            </div>
-
-            <div className="p-3 border-t border-neutral-200 dark:border-neutral-800">
-              <div className="text-xs uppercase tracking-wide text-neutral-500">
-                Motif
-              </div>
-              <div className="mt-1">
-                snow • stillness • mirage • fading world • ghost light
-              </div>
-            </div>
-
-            <div className="p-3 border-t border-neutral-200 dark:border-neutral-800">
-              <div className="text-xs uppercase tracking-wide text-neutral-500">
-                Mood
-              </div>
-              <div className="mt-1">melancholy / solitude / faint hope</div>
-            </div>
-
-            <div className="p-3 border-t border-neutral-200 dark:border-neutral-800 sm:col-span-2">
-              <div className="text-xs uppercase tracking-wide text-neutral-500">
-                Lore
-              </div>
-              <div className="mt-1 leading-relaxed">
-                A witch bound by a divine curse to wander through countless
-                lives. Each world she wakes in feels colder, emptier — her
-                memories blur like snow falling on glass. She no longer fights
-                the cycle; she simply walks through it, collecting fragments of
-                warmth that disappear by morning. In the silence between worlds,
-                she hums a song no one remembers — a promise left unfinished at
-                the edge of time.
-              </div>
-            </div>
-          </div>
-
-          {/* Black/White SoundCloud button (auto-inverts in dark mode) */}
-          <div className="mt-8 flex flex-col items-center text-center text-sm text-neutral-500 dark:text-neutral-400">
-            <a
-              href="https://soundcloud.com/suji_lament/sets/project-lyune"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block px-5 py-2 text-[15px] tracking-wide transition-all duration-200 rounded-full
-                border bg-black text-white border-black
-                hover:bg-white hover:text-black hover:border-black
-                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black
-                dark:bg-white dark:text-black dark:border-white
-                dark:hover:bg-black dark:hover:text-white dark:hover:border-white
-                dark:focus:ring-white dark:focus:ring-offset-neutral-900"
+        {/* Lore Section - Clean Style */}
+        <motion.section
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
+          className="mb-24"
+        >
+          <div className="sm:px-4">
+            <motion.h3 
+              initial={{ opacity: 0, letterSpacing: "0.5em" }}
+              whileInView={{ opacity: 1, letterSpacing: "0.1em" }}
+              transition={{ duration: 1.5 }}
+              className="text-center text-2xl font-light uppercase mb-12 text-[var(--accent)]"
             >
-              Project Lyune — a drifting world in sound
-            </a>
-          </div>
-        </div>
+              Character Archive
+            </motion.h3>
 
-        {/* Gallery */}
-        <div className="mt-12">
-          <div className="mb-3 text-sm text-neutral-500 dark:text-neutral-400">
-            Gallery
-          </div>
-          <div className="columns-1 sm:columns-2 gap-4 [column-fill:_balance]">
-            {GALLERY.map(({ src, cap }, i) => (
-              <figure
-                key={src}
-                className="relative group mb-4 break-inside-avoid opacity-0 animate-fadeInUp"
-                style={{ animationDelay: `${120 * i}ms` }}
-              >
-                <button
-                  onClick={() => openLightbox(src)}
-                  className="block w-full focus:outline-none"
-                  aria-label="Open image"
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Stats */}
+              <div className="space-y-6 font-mono text-sm">
+                <motion.div 
+                  initial={{ x: -20, opacity: 0 }}
+                  whileInView={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.2 }}
                 >
-                  <BlurImage
-                    src={src}
-                    alt={cap}
-                    className="w-full object-contain"
-                  />
-                  <span
-                    className="absolute inset-x-0 bottom-0 translate-y-2 opacity-0 group-hover:opacity-100 group-hover:translate-y-0
-                      transition-all duration-300 text-center text-xs bg-black/40 backdrop-blur-sm text-white py-1"
+                  <div className="text-xs text-neutral-400 uppercase mb-1">Designation</div>
+                  <div className="text-lg">LYUNE</div>
+                </motion.div>
+                <motion.div 
+                   initial={{ x: -20, opacity: 0 }}
+                   whileInView={{ x: 0, opacity: 1 }}
+                   transition={{ delay: 0.3 }}
+                >
+                  <div className="text-xs text-neutral-400 uppercase mb-1">Affinity</div>
+                  <div>Snow / Void / Echoes</div>
+                </motion.div>
+                <motion.div 
+                   initial={{ x: -20, opacity: 0 }}
+                   whileInView={{ x: 0, opacity: 1 }}
+                   transition={{ delay: 0.4 }}
+                >
+                  <div className="text-xs text-neutral-400 uppercase mb-1">Status</div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
+                    Wandering
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Description */}
+              <motion.div 
+                className="md:col-span-2 leading-relaxed text-neutral-600 dark:text-neutral-300 font-light"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ delay: 0.5, duration: 1 }}
+              >
+                <p className="mb-4">
+                  A witch bound by a divine curse to wander through countless lives. 
+                  Each world she wakes in feels colder, emptier — her memories blur like 
+                  snow falling on glass.
+                </p>
+                <p>
+                  She no longer fights the cycle; she simply walks through it, collecting 
+                  fragments of warmth that disappear by morning. In the silence between 
+                  worlds, she hums a song no one remembers — a promise left unfinished 
+                  at the edge of time.
+                </p>
+                
+                <div className="mt-8 pt-6 border-t border-dashed border-neutral-300 dark:border-neutral-700">
+                   <a
+                    href="https://soundcloud.com/suji_lament/sets/project-lyune"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-center gap-3 text-sm hover:text-[var(--accent)] transition-colors"
                   >
-                    {cap}
-                  </span>
-                </button>
-              </figure>
+                    <span className="w-8 h-8 flex items-center justify-center rounded-full border border-current group-hover:bg-[var(--accent)] group-hover:text-white transition-all">
+                      ▶
+                    </span>
+                    <span>Listen to Project Lyune audio logs</span>
+                  </a>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </motion.section>
+
+        {/* Gallery Grid */}
+        <motion.section
+          variants={containerVar}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-50px" }}
+          className="mb-24"
+        >
+          <motion.h3 variants={itemVar} className="text-center text-sm uppercase tracking-widest text-neutral-400 mb-8">
+            Visual Records
+          </motion.h3>
+          
+          <div className="columns-1 sm:columns-2 gap-6 space-y-6">
+            {GALLERY.map((img, i) => (
+              <motion.div
+                key={img.src}
+                variants={itemVar}
+                className="break-inside-avoid"
+              >
+                <div 
+                  className="group relative overflow-hidden cursor-zoom-in bg-neutral-100 dark:bg-neutral-800"
+                  onClick={() => openLightbox(img.src)}
+                >
+                  <BlurImage 
+                    src={img.src} 
+                    alt={img.cap} 
+                    className="w-full transition-transform duration-700 group-hover:scale-105" 
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+                  <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-gradient-to-t from-black/80 to-transparent">
+                    <p className="text-white text-xs tracking-wide text-center">{img.cap}</p>
+                  </div>
+                </div>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.section>
 
-        {/* Outro */}
-        <p className="mt-12 text-center italic text-neutral-600 dark:text-neutral-400">
-          “Maybe the silence between notes is where the truth hides.”
-        </p>
-
-        {/* Credits */}
-        <p className="mt-6 text-sm text-center text-neutral-500 dark:text-neutral-400">
-          Visual art by <span className="font-medium">lunaminiss</span>,
-          Jtlr4hj, hehehahaartowo, and UrsprungNull
-        </p>
-      </section>
-
-      {/* Lightbox */}
-      {lightboxIdx !== null && (
-        <div
-          onClick={closeLightbox}
-          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
-          role="dialog"
-          aria-modal="true"
+        {/* Footer Quote */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 1.5 }}
+          className="text-center text-neutral-400 text-sm italic"
         >
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              prev();
-            }}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-white/80 text-3xl select-none"
-            aria-label="Previous"
-          >
-            ‹
-          </button>
-          <img
-            src={ALL_IMAGES[lightboxIdx]}
-            alt="Artwork"
-            className="max-h-[92vh] max-w-[92vw] object-contain"
-          />
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              next();
-            }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 text-3xl select-none"
-            aria-label="Next"
-          >
-            ›
-          </button>
-        </div>
-      )}
+          “Maybe the silence between notes is where the truth hides.”
+        </motion.div>
+      </div>
 
-      {/* fade-in animation */}
-      <style>{`
-        @keyframes fadeInUp { 
-          from { opacity: 0; transform: translateY(10px); } 
-          to { opacity: 1; transform: translateY(0); } 
-        }
-        .animate-fadeInUp { animation: fadeInUp 0.8s ease forwards; }
-      `}</style>
+      {/* Lightbox Overlay */}
+      <AnimatePresence>
+        {lightboxIdx !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={closeLightbox}
+            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4"
+          >
+            <button
+              onClick={(e) => { e.stopPropagation(); prev(); }}
+              className="absolute left-4 p-4 text-white/50 hover:text-white transition-colors text-4xl"
+            >
+              ‹
+            </button>
+            
+            <motion.img
+              key={lightboxIdx}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              src={ALL_IMAGES[lightboxIdx]}
+              className="max-h-[90vh] max-w-[90vw] object-contain shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+
+            <button
+              onClick={(e) => { e.stopPropagation(); next(); }}
+              className="absolute right-4 p-4 text-white/50 hover:text-white transition-colors text-4xl"
+            >
+              ›
+            </button>
+            
+            <div className="absolute bottom-8 left-0 right-0 text-center text-white/50 text-sm">
+              {lightboxIdx === 0 ? FEATURED.cap : GALLERY[lightboxIdx - 1].cap}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
