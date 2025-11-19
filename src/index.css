@@ -9,4 +9,5 @@ html {
 /* Default font: Noto Sans JP */
 body {
   @apply font-sans;
+  overflow-x: hidden;
 }
