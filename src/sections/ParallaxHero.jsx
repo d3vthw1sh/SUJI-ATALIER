@@ -40,18 +40,28 @@ export default function ParallaxHero({
 
   const [ready, setReady] = useState(false);
   useEffect(() => {
-    let alive = true,
-      loaded = 0;
-    layers.forEach(({ src }) => {
+    let alive = true;
+    // Safety timeout: force reveal after 600ms even if slow
+    const timer = setTimeout(() => {
+      if (alive) setReady(true);
+    }, 600);
+
+    // Priority load: Background (Layer 1)
+    const imgBg = new Image();
+    imgBg.onload = () => {
+      if (alive) setReady(true);
+    };
+    imgBg.src = layers[0].src;
+
+    // Silent preload for others
+    layers.slice(1).forEach(({ src }) => {
       const img = new Image();
-      img.onload = img.onerror = () => {
-        loaded += 1;
-        if (alive && loaded === layers.length) setReady(true);
-      };
       img.src = src;
     });
+
     return () => {
       alive = false;
+      clearTimeout(timer);
     };
   }, [layers]);
 
@@ -146,32 +156,12 @@ export default function ParallaxHero({
         {/* Atmosphere */}
         <FloatingParticles count={25} className="bg-white/60" />
         
-        {/* Vignette & Grain */}
-        <div className="absolute inset-0 pointer-events-none z-30">
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]" />
-          <div
-            className="absolute inset-0 opacity-[0.04] mix-blend-overlay"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-            }}
-          />
-        </div>
-
         {/* Content Overlay */}
         <div className="absolute inset-0 z-40 flex items-center justify-center px-6">
           <div className="relative text-center pointer-events-auto">
             {children}
           </div>
         </div>
-
-        {/* Loading Veil */}
-        <motion.div
-          initial={{ opacity: 1 }}
-          animate={{ opacity: ready ? 0 : 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="absolute inset-0 bg-black z-50 pointer-events-none"
-        />
       </div>
     </section>
   );
