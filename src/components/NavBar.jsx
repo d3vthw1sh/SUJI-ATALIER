@@ -137,13 +137,11 @@ export function NavBar({
   return (
     <header
       className={[
-        "fixed inset-x-0 top-0 z-40 border-b transition-[height,background-color,border-color] duration-200",
+        "fixed inset-x-0 top-0 z-40 border-b transition-colors duration-200",
         // default (desktop look)
-        "bg-white dark:bg-black transition-colors",
-        // full screen (mobile)
-        open
-          ? "h-[100dvh] md:h-14 border-transparent bg-white dark:bg-black !bg-opacity-100"
-          : "h-14 border-black/5",
+        "bg-white dark:bg-black h-14",
+        // border state
+        open ? "border-transparent" : "border-black/5",
       ].join(" ")}
     >
       {/* Hidden audio element */}
@@ -236,15 +234,16 @@ export function NavBar({
       </div>
 
       {/* Mobile full-screen content */}
-      <AnimatePresence initial={false}>
+      {/* Mobile full-screen content */}
+      <AnimatePresence>
         {open && (
           <motion.nav
             key="mobile-full"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
-            className="md:hidden absolute inset-x-0 top-14 bottom-0 flex items-center justify-center"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="fixed inset-0 top-14 z-30 bg-white dark:bg-black md:hidden flex flex-col items-center justify-center"
             style={{
               paddingTop: "env(safe-area-inset-top)",
               paddingBottom: "env(safe-area-inset-bottom)",
